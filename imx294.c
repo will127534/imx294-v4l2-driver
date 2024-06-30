@@ -951,7 +951,7 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
 	const struct imx294_mode *mode = imx294->mode;
     u64 shr, vblk, tmp;
 	int ret = 0;
-
+        u64 pixel_rate,hmax;
 	/*
 	 * The VBLANK control may change the limits of usable exposure, so check
 	 * and adjust if necessary.
@@ -1005,7 +1005,7 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
 		DEBUG_PRINTK("\tVMAX : %d\n",imx294 -> VMAX);
 		ret = imx294_write_reg_3byte(imx294, IMX294_REG_VMAX, imx294 -> VMAX);
         vblk = imx294 -> VMAX  - mode-> min_VMAX;
-        DEBUG_PRINTK("\tvblk : %d\n",vblk);
+        DEBUG_PRINTK("\tvblk : %lld\n",vblk);
         ret = imx294_write_reg_2byte(imx294, IMX294_REG_PSSLVS1, vblk);
         ret = imx294_write_reg_2byte(imx294, IMX294_REG_PSSLVS2, vblk);
         ret = imx294_write_reg_2byte(imx294, IMX294_REG_PSSLVS3, vblk);
@@ -1022,9 +1022,9 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
 		{
 		DEBUG_PRINTK("V4L2_CID_HBLANK : %d\n",ctrl->val);
 		//int hmax = (IMX294_NATIVE_WIDTH + ctrl->val) * 72000000; / IMX294_PIXEL_RATE;
-		u64 pixel_rate = (u64)mode->width * 72000000;
+		pixel_rate = (u64)mode->width * 72000000;
 		do_div(pixel_rate,mode->min_HMAX);
-		u64 hmax = (u64)(mode->width + ctrl->val) * 72000000;
+		hmax = (u64)(mode->width + ctrl->val) * 72000000;
 		do_div(hmax,pixel_rate);
 		imx294 -> HMAX = hmax;
 		DEBUG_PRINTK("\tHMAX : %d\n",imx294 -> HMAX);

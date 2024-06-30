@@ -5,7 +5,8 @@ DRV_VERSION=0.0.1
 DRV_IMX=imx294
 
 echo "Uninstalling any previous ${DRV_IMX} module"
-dkms status ${DRV_IMX} | awk -F', ' '{print $2}' | xargs -n1 sudo dkms remove -m ${DRV_IMX} -v 
+#dkms status ${DRV_IMX} | awk -F', ' '{print $2}' | xargs -n1 sudo dkms remove -m ${DRV_IMX} -v 
+sudo dkms remove -m ${DRV_IMX} -v ${DRV_VERSION} --all
 
 sudo mkdir -p /usr/src/${DRV_IMX}-${DRV_VERSION}
 
