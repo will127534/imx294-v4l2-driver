@@ -394,6 +394,44 @@ static const struct imx294_reg mode_common_regs[] = {
 };
 
 
+/* 3704 x 2778 readout mode 0 - 14bit */
+static const struct imx294_reg mode_00_14bit_regs[] = {
+    {0x3004,0x00}, //MDSEL1 
+    {0x3005,0x0B}, //MDSEL2 
+    {0x3006,0x02}, //MDSEL3 
+    {0x3007,0xA0}, //MDSEL4 
+    {0x3019,0x00}, //MDVREV 
+    {0x3030,0x77}, //MDSEL5 
+    {0x3034,0x00}, //HOPBOUT_EN 
+    {0x3035,0x01}, //HTRIMMING_EN 
+    {0x3036,0x30}, //HTRIMMING_START 
+    {0x3037,0x00}, //HTRIMMING_START 
+    {0x3038,0x00}, //HTRIMMING_END 
+    {0x3039,0x0F}, //HTRIMMING_END 
+    {0x3068,0x44}, //MDSEL15 
+    {0x3069,0x00}, //MDSEL15 
+    {0x3080,0x00}, //MDSEL6 
+    {0x3081,0x01}, //MDSEL7 
+    {0x30A8,0x03}, //MDSEL8 
+    {0x30E2,0x00}, //VCUTMODE 
+    {0x312F,0x10}, //OPB_SIZE_V 
+    {0x3130,0x18}, //WRITE_VSIZE 
+    {0x3131,0x0B}, //WRITE_VSIZE 
+    {0x3132,0x08}, //OUT_SIZE 
+    {0x3133,0x0B}, //Y_OUT_SIZE 
+    {0x357F,0x0A}, //MDSEL11 
+    {0x3580,0x09}, //MDSEL12 
+    {0x3581,0x07}, //MDSEL13 
+    {0x3583,0x51}, //MDSEL14 
+    {0x3600,0x90}, //MDSEL16 
+    {0x3601,0x00}, //MDSEL16 
+    {0x3846,0x00}, //MDSEL9 
+    {0x3847,0x00}, //MDSEL9 
+    {0x384A,0x00}, //MDSEL10 
+    {0x384B,0x00}, //MDSEL10
+};
+
+
 /* 3704 x 2778 readout mode 0 - 12bit */
 static const struct imx294_reg mode_00_regs[] = {
     {0x3004,0x00}, //MDSEL1 
@@ -544,6 +582,32 @@ static const struct imx294_reg mode_01B_regs[] = {
 };
 
 /* Mode configs */
+static const struct imx294_mode supported_modes_14bit[] = {
+    {
+        /* 3704 x 2778 readout mode 0 */
+        .width = 3792,
+        .height = 2840,
+        .min_HMAX = 1730,
+        .min_VMAX = 1444,
+        .default_HMAX = 1875,
+        .default_VMAX = 1600, //24 FPS
+        .VMAX_scale = 2,
+        .min_SHR = 5,
+        .integration_offset = 551,
+        .crop = {
+            .left = 40,
+            .top = 24,
+            .width = 3704,
+            .height = 2778,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_00_14bit_regs),
+            .regs = mode_00_14bit_regs,
+        },
+    },
+};
+
+/* Mode configs */
 static const struct imx294_mode supported_modes_12bit[] = {
 	{
 		/* 4096 x 2160 readout mode 1 */
@@ -651,6 +715,11 @@ static const u32 codes[] = {
 	MEDIA_BUS_FMT_SGRBG12_1X12,
 	MEDIA_BUS_FMT_SGBRG12_1X12,
 	MEDIA_BUS_FMT_SBGGR12_1X12,
+	/* 14-bit modes. */
+	MEDIA_BUS_FMT_SRGGB14_1X14,
+	MEDIA_BUS_FMT_SGRBG14_1X14,
+	MEDIA_BUS_FMT_SGBRG14_1X14,
+	MEDIA_BUS_FMT_SBGGR14_1X14,
 
 };
 
@@ -732,6 +801,14 @@ static inline void get_mode_table(unsigned int code,
 				  unsigned int *num_modes)
 {
 	switch (code) {
+	/* 14-bit */
+	case MEDIA_BUS_FMT_SRGGB14_1X14:
+	case MEDIA_BUS_FMT_SGRBG14_1X14:
+	case MEDIA_BUS_FMT_SGBRG14_1X14:
+	case MEDIA_BUS_FMT_SBGGR14_1X14:
+		*mode_list = supported_modes_14bit;
+		*num_modes = ARRAY_SIZE(supported_modes_14bit);
+		break;
 	/* 12-bit */
 	case MEDIA_BUS_FMT_SRGGB12_1X12:
 	case MEDIA_BUS_FMT_SGRBG12_1X12:
