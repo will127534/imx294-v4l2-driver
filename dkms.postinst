@@ -1,5 +1,5 @@
 #!/bin/sh
 
-dtc -Wno-interrupts_property -@ -I dts -O dtb -o imx294.dtbo imx294-overlay.dts
+dtc -Wno-interrupts_property -Wno-unit_address_vs_reg -@ -I dts -O dtb -o imx294.dtbo imx294-overlay.dts
 
 install -m 751 imx294.dtbo /boot/overlays/
