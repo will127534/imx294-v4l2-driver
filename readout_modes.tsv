@@ -1,0 +1,20 @@
+Readout mode No	RAW	total_width	total_height	top	left	width	height	min_hmax	min_vmax	HMAX number per H period	Offset	min_SHR	Readout drive mode Mode description
+mode_1_17_9	RAW12	4144	2184	20	36	4096	2160	1122	1111	0.5	256	5	All-pixel scan mode (AD 12-bit, 12-bit length output) 
+mode_1A_17_9	RAW12	4176	2184	20	36	4096	2160	1192	1111	0.5	361	5	All-pixel scan mode (AD 12-bit, 12-bit length output) low noise 
+mode_1B_17_9	RAW12	3872	2184	20	20	3840	2160	1055	1111	0.5	256	5	All-pixel scan mode horizontal 3840 pixels (AD 12-bit, 12-bit length output) 
+mode_2_17_9	RAW10	4144	2184	20	36	4096	2160	947	1116	0.5	217	5	All-pixel scan mode (AD 10-bit, 10-bit length output) 
+mode_2A_17_9	RAW10	4176	2184	20	36	4096	2160	954	1116	0.5	322	5	All-pixel scan mode (AD 10-bit, 10-bit length output) low noise 
+mode_3_17_9	RAW14	2088	1100	14	18	2048	1080	706	1148	1	256	5	Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 14-bit length output) 
+mode_4_17_9	RAW12	2088	1100	14	18	2048	1080	706	1148	1	256	3	Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 12-bit length output) 
+mode_5_17_9	RAW12	2088	1100	14	18	2048	1080	607	1148	1	217	5	Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 10-bit, 12-bit length output) 
+mode_6_17_9	RAW10	2088	1100	14	18	2048	1080	520	1148	1	217	5	Vertical 2 binning Horizontal 2/4 subsampling (Vertical weighted binning) (AD 10-bit, 10-bit length output) 
+mode_7_17_9	RAW10	2088	1100	14	18	2048	1080	520	574	0.5	217	3	Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) 
+mode_8_17_9	RAW12	1392	740	14	12	1364	720	520	1182	1.5	217	7	Horizontal/vertical 3/3-line binning (AD 10-bit, 12-bit length output) 
+mode_9_17_9	RAW12	1392	740	14	12	1364	720	520	394	0.5	217	2	Vertical 1/3 subsampling horizontal 3 binning (AD 10-bit, 12-bit length output) 
+mode_10_17_9	RAW12	1392	252	10	12	1364	240	520	300	1	217	5	Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) 
+mode_11_17_9	RAW10	1392	250	8	12	1364	240	520	298	4	217	5	Vertical 2/9 subsampling binning horizontal 3 binning Low power consumption (AD 10-bit, 10-bit length output) 
+mode_0_4_3	RAW14	3792	2840	42	40	3704	2778	1730	1444	0.5	551	5	All-pixel scan mode (AD 14-bit, 14-bit length output) 
+mode_1_4_3	RAW12	3792	2840	42	40	3704	2778	1034	1444	0.5	256	5	All-pixel scan mode (AD 12-bit, 12-bit length output) 
+mode_1A_4_3	RAW12	3792	2840	42	40	3704	2778	1192	1444	0.5	361	5	All-pixel scan mode (AD 12-bit, 12-bit length output) low noise 
+mode_7_4_3	RAW10	1896	1408	14	20	1852	1388	520	728	0.5	217	3	Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) 
+mode_10_4_3	RAW12	1264	320	10	14	1234	308	520	368	1	217	5	Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) 

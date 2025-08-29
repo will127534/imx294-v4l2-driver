@@ -129,17 +129,19 @@
 #define IMX294_ANA_GAIN_DEFAULT         0
 
 /* Vertical Flip */
-#define IMX294_FLIP_MDVREV            CCI_REG8(0x3019)
+#define IMX294_REG_MDVREV            CCI_REG8(0x3019)
 
 /* Pixel rate helper (sensor line clock proxy used below) */
 #define IMX294_PIXEL_RATE               72000000U
 #define IMX294_LINK_FREQ               864000000U
 
 /* Native array */
-#define IMX294_NATIVE_WIDTH_17_9           4096U
-#define IMX294_NATIVE_HEIGHT_17_9          2160U
-#define IMX294_NATIVE_WIDTH_4_3            3704U
-#define IMX294_NATIVE_HEIGHT_4_3           2778U
+// 17:9 native
+#define IMX294_NATIVE_WIDTH_17_9   4096
+#define IMX294_NATIVE_HEIGHT_17_9  2160
+// 4:3 native
+#define IMX294_NATIVE_WIDTH_4_3    3704
+#define IMX294_NATIVE_HEIGHT_4_3   2778
 
 
 /* Vertical Arbitrary Cropping */
@@ -368,176 +370,544 @@ static const struct cci_reg_sequence mode_common_regs_stage3[] = {
     {IMX294_REG_SYNCDRV,0xA8}
 };
 
-
-
-
+/* 
+ * 17:9 Mode
+ */
 static const struct cci_reg_sequence mode_1_17_9_regs[] = {
-    {IMX294_REG_MDSEL1,           0x1A}, 
-    {IMX294_REG_MDSEL2,           0x06}, 
-    {IMX294_REG_MDSEL3,           0x00}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x1060}, 
-    {IMX294_REG_MDSEL15,        0x001A}, 
-    {IMX294_REG_MDSEL6,           0x00}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x02}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x08}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0888}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0880}, 
-    {IMX294_REG_MDSEL11,          0x0C},
-    {IMX294_REG_MDSEL12,          0x0A},
-    {IMX294_REG_MDSEL13,          0x08},
-    {IMX294_REG_MDSEL14,          0x72},
-    {IMX294_REG_MDSEL16,        0x0090}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x1A},
+    {IMX294_REG_MDSEL2,0x06},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1060},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x08},
+    {IMX294_REG_WRITE_VSIZE,0x0888},
+    {IMX294_REG_Y_OUT_SIZE,0x0880},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
 };
 
 static const struct cci_reg_sequence mode_1A_17_9_regs[] = {
-    {IMX294_REG_MDSEL1,           0x01}, 
-    {IMX294_REG_MDSEL2,           0x06}, 
-    {IMX294_REG_MDSEL3,           0x00}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x1080}, 
-    {IMX294_REG_MDSEL15,        0x001A}, 
-    {IMX294_REG_MDSEL6,           0x00}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x02}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x08}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0888}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0880}, 
-    {IMX294_REG_MDSEL11,          0x0C},
-    {IMX294_REG_MDSEL12,          0x0A},
-    {IMX294_REG_MDSEL13,          0x08},
-    {IMX294_REG_MDSEL14,          0x72},
-    {IMX294_REG_MDSEL16,        0x007D}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x01},
+    {IMX294_REG_MDSEL2,0x06},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x01},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x08},
+    {IMX294_REG_WRITE_VSIZE,0x0888},
+    {IMX294_REG_Y_OUT_SIZE,0x0880},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x007D},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
 };
 
 static const struct cci_reg_sequence mode_1B_17_9_regs[] = {
-    {IMX294_REG_MDSEL1,           0x02}, 
-    {IMX294_REG_MDSEL2,           0x06}, 
-    {IMX294_REG_MDSEL3,           0x01}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x0F50}, 
-    {IMX294_REG_MDSEL15,        0x001A}, 
-    {IMX294_REG_MDSEL6,           0x00}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x02}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x08}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0888}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0880}, 
-    {IMX294_REG_MDSEL11,          0x0C},
-    {IMX294_REG_MDSEL12,          0x0A},
-    {IMX294_REG_MDSEL13,          0x08},
-    {IMX294_REG_MDSEL14,          0x72},
-    {IMX294_REG_MDSEL16,        0x0090}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x02},
+    {IMX294_REG_MDSEL2,0x06},
+    {IMX294_REG_MDSEL3,0x01},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F50},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x08},
+    {IMX294_REG_WRITE_VSIZE,0x0888},
+    {IMX294_REG_Y_OUT_SIZE,0x0880},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
 };
 
+static const struct cci_reg_sequence mode_2_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x1A},
+    {IMX294_REG_MDSEL2,0x01},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1060},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x08},
+    {IMX294_REG_WRITE_VSIZE,0x0888},
+    {IMX294_REG_Y_OUT_SIZE,0x0880},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_2A_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x01},
+    {IMX294_REG_MDSEL2,0x01},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x01},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x08},
+    {IMX294_REG_WRITE_VSIZE,0x0888},
+    {IMX294_REG_Y_OUT_SIZE,0x0880},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x007D},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_3_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0xA8},
+    {IMX294_REG_MDSEL2,0x2A},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x02},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x044C},
+    {IMX294_REG_Y_OUT_SIZE,0x0448},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_4_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x0A},
+    {IMX294_REG_MDSEL2,0x26},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA1},
+    {IMX294_REG_MDSEL5,0x33},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x00},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x03},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x044C},
+    {IMX294_REG_Y_OUT_SIZE,0x0448},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_5_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0xA8},
+    {IMX294_REG_MDSEL2,0x25},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x02},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x044C},
+    {IMX294_REG_Y_OUT_SIZE,0x0448},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_6_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x0A},
+    {IMX294_REG_MDSEL2,0x41},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA1},
+    {IMX294_REG_MDSEL5,0x33},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x00},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x03},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x044C},
+    {IMX294_REG_Y_OUT_SIZE,0x0448},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_7_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x0D},
+    {IMX294_REG_MDSEL2,0x41},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x04},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x044C},
+    {IMX294_REG_Y_OUT_SIZE,0x0448},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x006C},
+    {IMX294_REG_MDSEL10,0x0034},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_8_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x4F},
+    {IMX294_REG_MDSEL2,0x35},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x05},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x02E4},
+    {IMX294_REG_Y_OUT_SIZE,0x02E0},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_9_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x11},
+    {IMX294_REG_MDSEL2,0x35},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x06},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x02E4},
+    {IMX294_REG_Y_OUT_SIZE,0x02E0},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0028},
+    {IMX294_REG_MDSEL10,0x003A},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_10_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x33},
+    {IMX294_REG_MDSEL2,0x35},
+    {IMX294_REG_MDSEL3,0x00},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x07},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x00FC},
+    {IMX294_REG_Y_OUT_SIZE,0x00F8},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0032},
+    {IMX294_REG_MDSEL10,0x0020},
+    {IMX294_REG_SVR,0x0000},
+};
+
+static const struct cci_reg_sequence mode_11_17_9_regs[] = {
+    {IMX294_REG_MDSEL1,0x15},
+    {IMX294_REG_MDSEL2,0x31},
+    {IMX294_REG_MDSEL3,0x38},
+    {IMX294_REG_MDSEL4,0xA1},
+    {IMX294_REG_MDSEL5,0x55},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x1080},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x00},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x08},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x00FA},
+    {IMX294_REG_Y_OUT_SIZE,0x00F6},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x003C},
+    {IMX294_REG_MDSEL10,0x0034},
+    {IMX294_REG_SVR,0x0000},
+};
+
+/* 
+ * 4:3 Mode
+ */
 static const struct cci_reg_sequence mode_0_4_3_regs[] = {
-    {IMX294_REG_MDSEL1,           0x00}, 
-    {IMX294_REG_MDSEL2,           0x0B}, 
-    {IMX294_REG_MDSEL3,           0x02}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x0F00}, 
-    {IMX294_REG_MDSEL15,        0x0044}, 
-    {IMX294_REG_MDSEL6,           0x00}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x03}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x10}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0B18}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0B08}, 
-    {IMX294_REG_MDSEL11,          0x0A},
-    {IMX294_REG_MDSEL12,          0x09},
-    {IMX294_REG_MDSEL13,          0x07},
-    {IMX294_REG_MDSEL14,          0x51},
-    {IMX294_REG_MDSEL16,        0x0090}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x00},
+    {IMX294_REG_MDSEL2,0x0B},
+    {IMX294_REG_MDSEL3,0x02},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDVREV,0x00},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F00},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x03},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x10},
+    {IMX294_REG_WRITE_VSIZE,0x0B18},
+    {IMX294_REG_Y_OUT_SIZE,0x0B08},
+    {IMX294_REG_MDSEL11,0x0A},
+    {IMX294_REG_MDSEL12,0x09},
+    {IMX294_REG_MDSEL13,0x07},
+    {IMX294_REG_MDSEL14,0x51},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
 };
 
 static const struct cci_reg_sequence mode_1_4_3_regs[] = {
-    {IMX294_REG_MDSEL1,           0x00}, 
-    {IMX294_REG_MDSEL2,           0x06}, 
-    {IMX294_REG_MDSEL3,           0x02}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x0F00}, 
-    {IMX294_REG_MDSEL15,        0x001A}, 
-    {IMX294_REG_MDSEL6,           0x00}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x02}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x10}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0B18}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0B08}, 
-    {IMX294_REG_MDSEL11,          0x0C},
-    {IMX294_REG_MDSEL12,          0x0A},
-    {IMX294_REG_MDSEL13,          0x08},
-    {IMX294_REG_MDSEL14,          0x72},
-    {IMX294_REG_MDSEL16,        0x0090}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x00},
+    {IMX294_REG_MDSEL2,0x06},
+    {IMX294_REG_MDSEL3,0x02},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDVREV,0x00},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F00},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x10},
+    {IMX294_REG_WRITE_VSIZE,0x0B18},
+    {IMX294_REG_Y_OUT_SIZE,0x0B08},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
 };
 
 static const struct cci_reg_sequence mode_1A_4_3_regs[] = {
-    {IMX294_REG_MDSEL1,           0x00}, 
-    {IMX294_REG_MDSEL2,           0x06}, 
-    {IMX294_REG_MDSEL3,           0x02}, 
-    {IMX294_REG_MDSEL4,           0xA0}, 
-    {IMX294_REG_SVR,          0x0000 },
-    {IMX294_REG_MDSEL5,           0x77}, 
-    {IMX294_REG_HOPBOUT,          0x00}, 
-    {IMX294_REG_HTRIMMING_EN,     0x01}, 
-    {IMX294_REG_HTRIMMING_START,  0x30}, 
-    {IMX294_REG_HTRIMMING_END,  0x0F00}, 
-    {IMX294_REG_MDSEL15,        0x001A}, 
-    {IMX294_REG_MDSEL6,           0x01}, 
-    {IMX294_REG_MDSEL7,           0x01}, 
-    {IMX294_REG_MDSEL8,           0x02}, 
-    {IMX294_REG_VCUTMODE,         0x00}, 
-    {IMX294_REG_OPB_SIZE_V,       0x10}, 
-    {IMX294_REG_WRITE_VSIZE,    0x0B18}, 
-    {IMX294_REG_Y_OUT_SIZE,     0x0B08}, 
-    {IMX294_REG_MDSEL11,          0x0C},
-    {IMX294_REG_MDSEL12,          0x0A},
-    {IMX294_REG_MDSEL13,          0x08},
-    {IMX294_REG_MDSEL14,          0x72},
-    {IMX294_REG_MDSEL16,        0x007D}, 
-    {IMX294_REG_MDSEL9,         0x0000}, 
-    {IMX294_REG_MDSEL10,        0x0000}, 
+    {IMX294_REG_MDSEL1,0x00},
+    {IMX294_REG_MDSEL2,0x06},
+    {IMX294_REG_MDSEL3,0x02},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDVREV,0x00},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F00},
+    {IMX294_REG_MDSEL15,0x001A},
+    {IMX294_REG_MDSEL6,0x01},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x00},
+    {IMX294_REG_OPB_SIZE_V,0x10},
+    {IMX294_REG_WRITE_VSIZE,0x0B18},
+    {IMX294_REG_Y_OUT_SIZE,0x0B08},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x08},
+    {IMX294_REG_MDSEL14,0x72},
+    {IMX294_REG_MDSEL16,0x007D},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
 };
+
+static const struct cci_reg_sequence mode_7_4_3_regs[] = {
+    {IMX294_REG_MDSEL1,0x0C},
+    {IMX294_REG_MDSEL2,0x41},
+    {IMX294_REG_MDSEL3,0x02},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDVREV,0x00},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F00},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x04},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x0580},
+    {IMX294_REG_Y_OUT_SIZE,0x057C},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+};
+
+static const struct cci_reg_sequence mode_10_4_3_regs[] = {
+    {IMX294_REG_MDSEL1,0x32},
+    {IMX294_REG_MDSEL2,0x35},
+    {IMX294_REG_MDSEL3,0x02},
+    {IMX294_REG_MDSEL4,0xA0},
+    {IMX294_REG_MDVREV,0x00},
+    {IMX294_REG_MDSEL5,0x77},
+    {IMX294_REG_HOPBOUT,0x00},
+    {IMX294_REG_HTRIMMING_EN,0x01},
+    {IMX294_REG_HTRIMMING_START,0x30},
+    {IMX294_REG_HTRIMMING_END,0x0F00},
+    {IMX294_REG_MDSEL15,0x0044},
+    {IMX294_REG_MDSEL6,0x00},
+    {IMX294_REG_MDSEL7,0x01},
+    {IMX294_REG_MDSEL8,0x02},
+    {IMX294_REG_VCUTMODE,0x07},
+    {IMX294_REG_OPB_SIZE_V,0x04},
+    {IMX294_REG_WRITE_VSIZE,0x0140},
+    {IMX294_REG_Y_OUT_SIZE,0x013C},
+    {IMX294_REG_MDSEL11,0x0C},
+    {IMX294_REG_MDSEL12,0x0A},
+    {IMX294_REG_MDSEL13,0x0A},
+    {IMX294_REG_MDSEL14,0x75},
+    {IMX294_REG_MDSEL16,0x0090},
+    {IMX294_REG_MDSEL9,0x0000},
+    {IMX294_REG_MDSEL10,0x0000},
+};
+
 
 
 /* Mode description */
@@ -563,22 +933,156 @@ struct imx294_mode {
 /* --------------------------------------------------------------------------
  * Mode list
  * --------------------------------------------------------------------------
- * 4:3:
- *   0 All-pixel scan mode (AD 14-bit, 14-bit length output) 
- *   1 All-pixel scan mode (AD 12-bit, 12-bit length output)
- *  1A All-pixel scan mode Low power consumption (AD 12-bit, 12-bit length output) 
- * 17:9
- *   1 All-pixel scan mode (AD 12-bit, 12-bit length output)
- *  1A All-pixel scan mode Low power consumption (AD 12-bit, 12-bit length output) 
- *  1B All-pixel scan mode horizontal 3840 pixels (AD 12-bit, 12-bit length output)  
- *   2 All-pixel scan mode (AD 10-bit, 10-bit length output) 
- *  2A All-pixel scan mode Low power consumption (AD 10-bit, 10-bit length output) 
+ * 17:9 Modes:
+ *     mode 1    All-pixel scan mode (AD 12-bit, 12-bit length output) 
+ *     mode 1A   All-pixel scan mode (AD 12-bit, 12-bit length output) low noise 
+ *     mode 1B   All-pixel scan mode horizontal 3840 pixels (AD 12-bit, 12-bit length output) 
+ *     mode 2    All-pixel scan mode (AD 10-bit, 10-bit length output) 
+ *     mode 2A   All-pixel scan mode (AD 10-bit, 10-bit length output) low noise 
+ *     mode 3    Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 14-bit length output) 
+ *     mode 4    Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 12-bit length output) 
+ *     mode 5    Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 10-bit, 12-bit length output) 
+ *     mode 6    Vertical 2 binning Horizontal 2/4 subsampling (Vertical weighted binning) (AD 10-bit, 10-bit length output) 
+ *     mode 7    Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) 
+ *     mode 8    Horizontal/vertical 3/3-line binning (AD 10-bit, 12-bit length output) 
+ *     mode 9    Vertical 1/3 subsampling horizontal 3 binning (AD 10-bit, 12-bit length output) 
+ *     mode 10   Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) 
+ *     mode 11   Vertical 2/9 subsampling binning horizontal 3 binning Low power consumption (AD 10-bit, 10-bit length output) 
+ * 4:3 Modes:
+ *     mode 0    All-pixel scan mode (AD 14-bit, 14-bit length output) 
+ *     mode 1    All-pixel scan mode (AD 12-bit, 12-bit length output) 
+ *     mode 1A   All-pixel scan mode (AD 12-bit, 12-bit length output) low noise 
+ *     mode 7    Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) 
+ *     mode 10   Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) 
  */
 
-static struct imx294_mode supported_modes_12bit[] = {
+static struct imx294_mode supported_modes_10bit[] = {
+   /* 17:9 Mode 2 — All-pixel scan mode (AD 10-bit, 10-bit length output) */
     {
-        /* 17:9 Mode 1 */
-        .width = 4144,
+        .width  = 4144,
+        .height = 2184,
+        .min_hmax = 947,
+        .min_vmax = 1116,
+        .scale = 2,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 36,
+            .top = 20,
+            .width = 4096,
+            .height = 2160,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_2_17_9_regs),
+            .regs        = mode_2_17_9_regs,
+        },
+    },
+   /* 17:9 Mode 2A — All-pixel scan mode (AD 10-bit, 10-bit length output) low noise */
+    /*{
+        .width  = 4176,
+        .height = 2184,
+        .min_hmax = 954,
+        .min_vmax = 1116,
+        .scale = 2,
+        .min_shr = 5,
+        .integration_offset = 322,
+        .crop = {
+            .left = 36,
+            .top = 20,
+            .width = 4096,
+            .height = 2160,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_2A_17_9_regs),
+            .regs        = mode_2A_17_9_regs,
+        },
+    },*/
+   /* 17:9 Mode 6 — Vertical 2 binning Horizontal 2/4 subsampling (Vertical weighted binning) (AD 10-bit, 10-bit length output) */
+    {
+        .width  = 2088,
+        .height = 1100,
+        .min_hmax = 520,
+        .min_vmax = 1148,
+        .scale = 1,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 18,
+            .top = 14,
+            .width = 2048,
+            .height = 1080,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_6_17_9_regs),
+            .regs        = mode_6_17_9_regs,
+        },
+    },
+   /* 17:9 Mode 7 — Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) */
+    /*{
+        .width  = 2088,
+        .height = 1100,
+        .min_hmax = 520,
+        .min_vmax = 574,
+        .scale = 2,
+        .min_shr = 3,
+        .integration_offset = 217,
+        .crop = {
+            .left = 18,
+            .top = 14,
+            .width = 2048,
+            .height = 1080,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_7_17_9_regs),
+            .regs        = mode_7_17_9_regs,
+        },
+    },*/
+   /* 17:9 Mode 11 — Vertical 2/9 subsampling binning horizontal 3 binning Low power consumption (AD 10-bit, 10-bit length output) */
+    {
+        .width  = 1392,
+        .height = 250,
+        .min_hmax = 520,
+        .min_vmax = 298,
+        .scale = 0,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 12,
+            .top = 8,
+            .width = 1364,
+            .height = 240,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_11_17_9_regs),
+            .regs        = mode_11_17_9_regs,
+        },
+    },
+   /* 4:3 Mode 7 — Horizontal/vertical 2/4 subsampling (AD 10-bit, 10-bit length output) */
+    {
+        .width  = 1896,
+        .height = 1408,
+        .min_hmax = 520,
+        .min_vmax = 728,
+        .scale = 2,
+        .min_shr = 3,
+        .integration_offset = 217,
+        .crop = {
+            .left = 20,
+            .top = 14,
+            .width = 1852,
+            .height = 1388,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_7_4_3_regs),
+            .regs        = mode_7_4_3_regs,
+        },
+    },
+};
+
+static struct imx294_mode supported_modes_12bit[] = {
+   /* 17:9 Mode 1 — All-pixel scan mode (AD 12-bit, 12-bit length output) */
+    {
+        .width  = 4144,
         .height = 2184,
         .min_hmax = 1122,
         .min_vmax = 1111,
@@ -593,12 +1097,12 @@ static struct imx294_mode supported_modes_12bit[] = {
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_1_17_9_regs),
-            .regs = mode_1_17_9_regs,
+            .regs        = mode_1_17_9_regs,
         },
     },
-    {
-        /* 17:9 Mode 1A */
-        .width = 4176,
+   /* 17:9 Mode 1A — All-pixel scan mode (AD 12-bit, 12-bit length output) low noise */
+    /*{
+        .width  = 4176,
         .height = 2184,
         .min_hmax = 1192,
         .min_vmax = 1111,
@@ -613,12 +1117,12 @@ static struct imx294_mode supported_modes_12bit[] = {
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_1A_17_9_regs),
-            .regs = mode_1A_17_9_regs,
+            .regs        = mode_1A_17_9_regs,
         },
-    },
+    },*/
+   /* 17:9 Mode 1B — All-pixel scan mode horizontal 3840 pixels (AD 12-bit, 12-bit length output) */
     {
-        /* 17:9 Mode 1B */
-        .width = 3872,
+        .width  = 3872,
         .height = 2184,
         .min_hmax = 1055,
         .min_vmax = 1111,
@@ -633,12 +1137,112 @@ static struct imx294_mode supported_modes_12bit[] = {
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_1B_17_9_regs),
-            .regs = mode_1B_17_9_regs,
+            .regs        = mode_1B_17_9_regs,
         },
     },
+   /* 17:9 Mode 4 — Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 12-bit length output) */
     {
-        /* 4:3 Mode 1 */
-        .width = 3792,
+        .width  = 2088,
+        .height = 1100,
+        .min_hmax = 706,
+        .min_vmax = 1148,
+        .scale = 1,
+        .min_shr = 3,
+        .integration_offset = 256,
+        .crop = {
+            .left = 18,
+            .top = 14,
+            .width = 2048,
+            .height = 1080,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_4_17_9_regs),
+            .regs        = mode_4_17_9_regs,
+        },
+    },
+   /* 17:9 Mode 5 — Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 10-bit, 12-bit length output) */
+    /*{
+        .width  = 2088,
+        .height = 1100,
+        .min_hmax = 607,
+        .min_vmax = 1148,
+        .scale = 1,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 18,
+            .top = 14,
+            .width = 2048,
+            .height = 1080,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_5_17_9_regs),
+            .regs        = mode_5_17_9_regs,
+        },
+    },*/
+   /* 17:9 Mode 8 — Horizontal/vertical 3/3-line binning (AD 10-bit, 12-bit length output) */
+    {
+        .width  = 1392,
+        .height = 740,
+        .min_hmax = 520,
+        .min_vmax = 1182,
+        .scale = 1,
+        .min_shr = 7,
+        .integration_offset = 217,
+        .crop = {
+            .left = 12,
+            .top = 14,
+            .width = 1364,
+            .height = 720,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_8_17_9_regs),
+            .regs        = mode_8_17_9_regs,
+        },
+    },
+   /* 17:9 Mode 9 — Vertical 1/3 subsampling horizontal 3 binning (AD 10-bit, 12-bit length output) */
+    /*{
+        .width  = 1392,
+        .height = 740,
+        .min_hmax = 520,
+        .min_vmax = 394,
+        .scale = 2,
+        .min_shr = 2,
+        .integration_offset = 217,
+        .crop = {
+            .left = 12,
+            .top = 14,
+            .width = 1364,
+            .height = 720,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_9_17_9_regs),
+            .regs        = mode_9_17_9_regs,
+        },
+    },*/
+   /* 17:9 Mode 10 — Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) */
+    {
+        .width  = 1392,
+        .height = 252,
+        .min_hmax = 520,
+        .min_vmax = 300,
+        .scale = 1,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 12,
+            .top = 10,
+            .width = 1364,
+            .height = 240,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_10_17_9_regs),
+            .regs        = mode_10_17_9_regs,
+        },
+    },
+   /* 4:3 Mode 1 — All-pixel scan mode (AD 12-bit, 12-bit length output) */
+    {
+        .width  = 3792,
         .height = 2840,
         .min_hmax = 1034,
         .min_vmax = 1444,
@@ -647,18 +1251,18 @@ static struct imx294_mode supported_modes_12bit[] = {
         .integration_offset = 256,
         .crop = {
             .left = 40,
-            .top = 24,
+            .top = 42,
             .width = 3704,
             .height = 2778,
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_1_4_3_regs),
-            .regs = mode_1_4_3_regs,
+            .regs        = mode_1_4_3_regs,
         },
     },
-    {
-        /* 4:3 Mode 1A */
-        .width = 3792,
+   /* 4:3 Mode 1A — All-pixel scan mode (AD 12-bit, 12-bit length output) low noise */
+    /*{
+        .width  = 3792,
         .height = 2840,
         .min_hmax = 1192,
         .min_vmax = 1444,
@@ -667,21 +1271,61 @@ static struct imx294_mode supported_modes_12bit[] = {
         .integration_offset = 361,
         .crop = {
             .left = 40,
-            .top = 24,
+            .top = 42,
             .width = 3704,
             .height = 2778,
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_1A_4_3_regs),
-            .regs = mode_1A_4_3_regs,
+            .regs        = mode_1A_4_3_regs,
+        },
+    },*/
+   /* 4:3 Mode 10 — Vertical 2/9 subsampling binning horizontal 3 binning (AD 10-bit, 12-bit length output) */
+    {
+        .width  = 1264,
+        .height = 320,
+        .min_hmax = 520,
+        .min_vmax = 368,
+        .scale = 1,
+        .min_shr = 5,
+        .integration_offset = 217,
+        .crop = {
+            .left = 14,
+            .top = 10,
+            .width = 1234,
+            .height = 308,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_10_4_3_regs),
+            .regs        = mode_10_4_3_regs,
         },
     },
 };
 
 static struct imx294_mode supported_modes_14bit[] = {
+   /* 17:9 Mode 3 — Horizontal/vertical 2/2-line binning (Horizontal and vertical weighted binning) (AD 12-bit, 14-bit length output) */
     {
-        /* 4:3 Mode 0 */
-        .width = 3792,
+        .width  = 2088,
+        .height = 1100,
+        .min_hmax = 706,
+        .min_vmax = 1148,
+        .scale = 1,
+        .min_shr = 5,
+        .integration_offset = 256,
+        .crop = {
+            .left = 18,
+            .top = 14,
+            .width = 2048,
+            .height = 1080,
+        },
+        .reg_list = {
+            .num_of_regs = ARRAY_SIZE(mode_3_17_9_regs),
+            .regs        = mode_3_17_9_regs,
+        },
+    },
+   /* 4:3 Mode 0 — All-pixel scan mode (AD 14-bit, 14-bit length output) */
+    {
+        .width  = 3792,
         .height = 2840,
         .min_hmax = 1730,
         .min_vmax = 1444,
@@ -690,20 +1334,24 @@ static struct imx294_mode supported_modes_14bit[] = {
         .integration_offset = 551,
         .crop = {
             .left = 40,
-            .top = 24,
+            .top = 42,
             .width = 3704,
             .height = 2778,
         },
         .reg_list = {
             .num_of_regs = ARRAY_SIZE(mode_0_4_3_regs),
-            .regs = mode_0_4_3_regs,
+            .regs        = mode_0_4_3_regs,
         },
-    }
+    },
 };
-
 
 /* Formats exposed per mode/bit depth */
 static const u32 codes[] = {
+    /* 10-bit modes. */
+    MEDIA_BUS_FMT_SRGGB10_1X10,
+    MEDIA_BUS_FMT_SGRBG10_1X10,
+    MEDIA_BUS_FMT_SGBRG10_1X10,
+    MEDIA_BUS_FMT_SBGGR10_1X10,
     /* 12-bit modes. */
     MEDIA_BUS_FMT_SRGGB12_1X12,
     MEDIA_BUS_FMT_SGRBG12_1X12,
@@ -797,6 +1445,14 @@ static inline void get_mode_table(struct imx294 *imx294, unsigned int code,
         *mode_list = supported_modes_12bit;
         *num_modes = ARRAY_SIZE(supported_modes_12bit);
         break;
+    /* 12-bit */
+    case MEDIA_BUS_FMT_SRGGB10_1X10:
+    case MEDIA_BUS_FMT_SGRBG10_1X10:
+    case MEDIA_BUS_FMT_SGBRG10_1X10:
+    case MEDIA_BUS_FMT_SBGGR10_1X10:
+        *mode_list = supported_modes_10bit;
+        *num_modes = ARRAY_SIZE(supported_modes_10bit);
+        break;
     default:
         *mode_list = NULL;
         *num_modes = 0;
@@ -862,8 +1518,7 @@ static void imx294_set_framing_limits(struct imx294 *imx294,
     /* Pixel rate proxy: width * clock / min_hmax */
     pixel_rate = (u64)mode->width * IMX294_PIXEL_RATE * mode -> scale;
     do_div(pixel_rate, mode->min_hmax);
-    __v4l2_ctrl_modify_range(imx294->pixel_rate, pixel_rate, pixel_rate, 1,
-                 pixel_rate);
+    __v4l2_ctrl_modify_range(imx294->pixel_rate, pixel_rate, pixel_rate, 1, pixel_rate);
 
     max_hblank = (u64)IMX294_HMAX_MAX * pixel_rate;
     do_div(max_hblank, IMX294_PIXEL_RATE);
@@ -994,7 +1649,7 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
         break;
     }
     case V4L2_CID_VFLIP:
-        ret = cci_write(imx294->regmap, IMX294_FLIP_MDVREV, ctrl->val, NULL);
+        ret = cci_write(imx294->regmap, IMX294_REG_MDVREV, ctrl->val, NULL);
         if (ret)
             dev_err_ratelimited(imx294->clientdev, "VFLIP write failed (%d)\n", ret);
         break;
@@ -1155,7 +1810,6 @@ static int imx294_set_pad_format(struct v4l2_subdev *sd,
     format = v4l2_subdev_state_get_format(sd_state, 0);
     *format = fmt->format;
 
-    /* >>> Make the crop follow the selected mode <<< */
     crop = v4l2_subdev_state_get_crop(sd_state, 0);
     *crop = mode->crop;
 
@@ -1177,7 +1831,6 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
 {
     struct imx294 *imx294 = to_imx294(sd);
     const struct imx294_mode *mode_list, *mode;
-    struct v4l2_subdev_state *st;
     struct v4l2_mbus_framefmt *fmt;
     unsigned int n_modes;
     int ret;
@@ -1196,12 +1849,13 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     }
 
     /* Select mode */
-    st  = v4l2_subdev_get_locked_active_state(&imx294->sd);
-    fmt = v4l2_subdev_state_get_format(st, 0);
+    fmt = v4l2_subdev_state_get_format(state, 0);
 
     get_mode_table(imx294, fmt->code, &mode_list, &n_modes);
     mode = v4l2_find_nearest_size(mode_list, n_modes, width, height,
                       fmt->width, fmt->height);
+
+    dev_info(imx294->clientdev,"Set mode: %d x %d\n",mode->width,mode->height);
 
     ret = cci_multi_reg_write(imx294->regmap, mode->reg_list.regs,
                   mode->reg_list.num_of_regs, NULL);
@@ -1209,6 +1863,7 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
         dev_err(imx294->clientdev, "Failed to write mode registers\n");
         goto err_rpm_put;
     }
+    imx294_set_framing_limits(imx294, mode);
     /* Apply user controls after writing the base tables */
     ret = __v4l2_ctrl_handler_setup(imx294->sd.ctrl_handler);
     if (ret) {
@@ -1331,21 +1986,17 @@ static int imx294_get_selection(struct v4l2_subdev *sd,
     get_mode_table(imx294, fmt->code, &mode_list, &n_modes);
     mode = v4l2_find_nearest_size(mode_list, n_modes, width, height,
                       fmt->width, fmt->height);
-    bool is_43 = (fmt->height > 2160);   // crude but works
-    switch (sel->target) {
-    case V4L2_SEL_TGT_CROP:
-        sel->r = *v4l2_subdev_state_get_crop(sd_state, 0);
-        return 0;
 
+    switch (sel->target) {
     case V4L2_SEL_TGT_NATIVE_SIZE:
-    case V4L2_SEL_TGT_CROP_BOUNDS:
         sel->r.left   = 0;
         sel->r.top    = 0;
-        sel->r.width  = is_43 ? IMX294_NATIVE_WIDTH_4_3  : IMX294_NATIVE_WIDTH_17_9;
-        sel->r.height = is_43 ? IMX294_NATIVE_HEIGHT_4_3 : IMX294_NATIVE_HEIGHT_17_9;
+        sel->r.width  = mode->width;
+        sel->r.height = mode->height;
         return 0;
-
     case V4L2_SEL_TGT_CROP_DEFAULT:
+    case V4L2_SEL_TGT_CROP_BOUNDS:
+    case V4L2_SEL_TGT_CROP:
         sel->r = *v4l2_subdev_state_get_crop(sd_state, 0);
         return 0;
     default:
