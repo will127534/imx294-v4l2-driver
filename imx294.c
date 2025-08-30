@@ -1456,7 +1456,7 @@ static const char * const imx294_supply_name[] = {
 struct imx294 {
     struct v4l2_subdev sd;
     struct media_pad pad;
-    struct device *clientdev;
+    struct device *dev;
     struct regmap *regmap;
 
     struct clk *xclk;
@@ -1606,7 +1606,7 @@ static void imx294_set_framing_limits(struct imx294 *imx294,
                  imx294->vmax - mode->min_shr, 1,
                  IMX294_EXPOSURE_DEFAULT);
 
-    dev_info(imx294->clientdev, "Framing: VMAX=%u HMAX=%u pixel_rate=%llu\n",
+    dev_info(imx294->dev, "Framing: VMAX=%u HMAX=%u pixel_rate=%llu\n",
         imx294->vmax, imx294->hmax, pixel_rate);
 }
 
@@ -1645,32 +1645,32 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
         calculate_min_max_v4l2_cid_exposure(imx294->hmax, imx294->vmax, (u64)mode->min_shr, 0, mode->integration_offset, &min_exposure, &max_exposure);
         current_exposure = clamp_t(uint32_t, current_exposure, min_exposure, max_exposure);
 
-        dev_info(imx294->clientdev,"exposure_max:%lld, exposure_min:%lld, current_exposure:%d\n",max_exposure, min_exposure, current_exposure);
-        dev_info(imx294->clientdev,"\tVMAX:%d, HMAX:%d\n",imx294->vmax, imx294->hmax);
+        dev_info(imx294->dev,"exposure_max:%lld, exposure_min:%lld, current_exposure:%d\n",max_exposure, min_exposure, current_exposure);
+        dev_info(imx294->dev,"\tVMAX:%d, HMAX:%d\n",imx294->vmax, imx294->hmax);
         __v4l2_ctrl_modify_range(imx294->exposure, min_exposure,max_exposure, 1,current_exposure);
     }
 
     /* Apply control only when powered (runtime active). */
-    if (!pm_runtime_get_if_active(imx294->clientdev))
+    if (!pm_runtime_get_if_active(imx294->dev))
         return 0;
 
     switch (ctrl->id) {
     case V4L2_CID_EXPOSURE: {
         u32 shr = calculate_shr(ctrl->val, imx294->hmax, imx294->vmax, 0, mode->integration_offset);
 
-        dev_info(imx294->clientdev, "EXPOSURE=%u -> SHR=%u (VMAX=%u HMAX=%u)\n",
+        dev_info(imx294->dev, "EXPOSURE=%u -> SHR=%u (VMAX=%u HMAX=%u)\n",
             ctrl->val, shr, imx294->vmax, imx294->hmax);
 
         ret = cci_write(imx294->regmap, IMX294_REG_SHR, shr, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "SHR write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "SHR write failed (%d)\n", ret);
         break;
     }
     case V4L2_CID_ANALOGUE_GAIN:
-        dev_info(imx294->clientdev, "ANALOG_GAIN=%u\n", ctrl->val);
+        dev_info(imx294->dev, "ANALOG_GAIN=%u\n", ctrl->val);
         ret = cci_write(imx294->regmap, IMX294_REG_ANALOG_GAIN, ctrl->val, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "Gain write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "Gain write failed (%d)\n", ret);
         break;
     case V4L2_CID_VBLANK: {
         u32 vmax = mode->height + ctrl->val;
@@ -1679,14 +1679,14 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
         do_div(vmax, mode->scale);
         imx294->vmax = vmax;
 
-        dev_info(imx294->clientdev, "VBLANK=%u -> VMAX=%u\n", ctrl->val, imx294->vmax);
+        dev_info(imx294->dev, "VBLANK=%u -> VMAX=%u\n", ctrl->val, imx294->vmax);
 
         ret = cci_write(imx294->regmap, IMX294_REG_VMAX, imx294->vmax, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "VMAX write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "VMAX write failed (%d)\n", ret);
 
         vblk = imx294->vmax - mode->min_vmax;
-        dev_info(imx294->clientdev,"\tvblk : %lld\n",vblk);
+        dev_info(imx294->dev,"\tvblk : %lld\n",vblk);
         ret = cci_write(imx294->regmap, IMX294_REG_PSSLVS1, vblk, NULL);
         ret = cci_write(imx294->regmap, IMX294_REG_PSSLVS2, vblk, NULL);
         ret = cci_write(imx294->regmap, IMX294_REG_PSSLVS3, vblk, NULL);
@@ -1708,11 +1708,11 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
         do_div(hmax, pixel_rate);
         imx294->hmax = (u32)hmax;
 
-        dev_info(imx294->clientdev, "HBLANK=%u -> HMAX=%u\n", ctrl->val, imx294->hmax);
+        dev_info(imx294->dev, "HBLANK=%u -> HMAX=%u\n", ctrl->val, imx294->hmax);
 
         ret = cci_write(imx294->regmap, IMX294_REG_HMAX, imx294->hmax, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "HMAX write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "HMAX write failed (%d)\n", ret);
         ret = cci_write(imx294->regmap, IMX294_REG_HCOUNT1, imx294->hmax, NULL);
         ret = cci_write(imx294->regmap, IMX294_REG_HCOUNT2, imx294->hmax, NULL);
         break;
@@ -1720,29 +1720,29 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
     case V4L2_CID_VFLIP:
         ret = cci_write(imx294->regmap, IMX294_REG_MDVREV, ctrl->val, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "VFLIP write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "VFLIP write failed (%d)\n", ret);
         break;
     case V4L2_CID_BRIGHTNESS: {
         u16 blacklevel = min_t(u32, ctrl->val, 4095);
 
         ret = cci_write(imx294->regmap, IMX294_REG_BLKLEVEL, blacklevel, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "BLKLEVEL write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "BLKLEVEL write failed (%d)\n", ret);
         break;
     }
     case V4L2_CID_IMX585_HCG_GAIN:
-        dev_info(imx294->clientdev, "HCG=%u\n", ctrl->val);
+        dev_info(imx294->dev, "HCG=%u\n", ctrl->val);
         ret = cci_write(imx294->regmap, IMX294_REG_MCOVGAIN, ctrl->val, NULL);
         if (ret)
-            dev_err_ratelimited(imx294->clientdev, "MCOVGAIN write failed (%d)\n", ret);
+            dev_err_ratelimited(imx294->dev, "MCOVGAIN write failed (%d)\n", ret);
         break;
     default:
-        dev_info(imx294->clientdev, "Unhandled ctrl %s: id=0x%x, val=0x%x\n",
+        dev_info(imx294->dev, "Unhandled ctrl %s: id=0x%x, val=0x%x\n",
             ctrl->name, ctrl->id, ctrl->val);
         break;
     }
 
-    pm_runtime_put(imx294->clientdev);
+    pm_runtime_put(imx294->dev);
     return ret;
 }
 
@@ -1804,11 +1804,11 @@ static int imx294_init_controls(struct imx294 *imx294)
 
     if (hdl->error) {
         ret = hdl->error;
-        dev_err(imx294->clientdev, "control init failed (%d)\n", ret);
+        dev_err(imx294->dev, "control init failed (%d)\n", ret);
         goto err_free;
     }
 
-    ret = v4l2_fwnode_device_parse(imx294->clientdev, &props);
+    ret = v4l2_fwnode_device_parse(imx294->dev, &props);
     if (ret)
         goto err_free;
 
@@ -1931,9 +1931,9 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     unsigned int n_modes;
     int ret;
 
-    ret = pm_runtime_get_sync(imx294->clientdev);
+    ret = pm_runtime_get_sync(imx294->dev);
     if (ret < 0) {
-        pm_runtime_put_noidle(imx294->clientdev);
+        pm_runtime_put_noidle(imx294->dev);
         return ret;
     }
 
@@ -1946,13 +1946,13 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     cci_multi_reg_write(imx294->regmap, imx294->freq->regs,
                 imx294->freq->reg_count, &ret);
 
-    dev_info(imx294->clientdev, "Using clk freq %d Hz",
+    dev_info(imx294->dev, "Using clk freq %d Hz",
         imx294->freq->mhz);
 
     ret = cci_multi_reg_write(imx294->regmap, mode_common_regs_stage1,
                   ARRAY_SIZE(mode_common_regs_stage1), NULL);
     if (ret) {
-        dev_err(imx294->clientdev, "Failed to write common settings stage 1\n");
+        dev_err(imx294->dev, "Failed to write common settings stage 1\n");
         goto err_rpm_put;
     }
 
@@ -1964,19 +1964,19 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     mode = v4l2_find_nearest_size(mode_list, n_modes, width, height,
                       fmt->width, fmt->height);
 
-    dev_info(imx294->clientdev,"Set mode: %d x %d\n",mode->width,mode->height);
+    dev_info(imx294->dev,"Set mode: %d x %d\n",mode->width,mode->height);
 
     ret = cci_multi_reg_write(imx294->regmap, mode->reg_list.regs,
                   mode->reg_list.num_of_regs, NULL);
     if (ret) {
-        dev_err(imx294->clientdev, "Failed to write mode registers\n");
+        dev_err(imx294->dev, "Failed to write mode registers\n");
         goto err_rpm_put;
     }
     imx294_set_framing_limits(imx294, mode);
     /* Apply user controls after writing the base tables */
     ret = __v4l2_ctrl_handler_setup(imx294->sd.ctrl_handler);
     if (ret) {
-        dev_err(imx294->clientdev, "Control handler setup failed\n");
+        dev_err(imx294->dev, "Control handler setup failed\n");
         goto err_rpm_put;
     }
 
@@ -1984,7 +1984,7 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     ret = cci_multi_reg_write(imx294->regmap, mode_common_regs_stage2,
                   ARRAY_SIZE(mode_common_regs_stage2), NULL);
     if (ret) {
-        dev_err(imx294->clientdev, "Failed to write common settings stage 2\n");
+        dev_err(imx294->dev, "Failed to write common settings stage 2\n");
         goto err_rpm_put;
     }
 
@@ -1992,20 +1992,20 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
 
     /* Sync configuration */
     if (imx294->sync_mode == SYNC_LEADER) {
-        dev_info(imx294->clientdev, "Internal sync follower: XVS input\n");
+        dev_info(imx294->dev, "Internal sync follower: XVS input\n");
         //Master / Slave Switching -> Master mode , Master mode operation -> Master mode start
         cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, IMX294_MODE_MSTSLV_BITS, &ret);
         //XVS/XHS output (top 5 bits is always 0x2A)
         cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8, &ret);
     } else {
-        dev_info(imx294->clientdev, "Follower: XVS/XHS input\n");
+        dev_info(imx294->dev, "Follower: XVS/XHS input\n");
         //Master / Slave Switching -> Slave mode , Master mode operation -> Master mode stop
         cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, IMX294_MODE_XMSTA_BITS, &ret);
         //XHS/XVS is Hi-Z (top 5 bits is always 0x2A)
         cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8 | 0x03, &ret);
     }
 
-    dev_info(imx294->clientdev, "Streaming started\n");
+    dev_info(imx294->dev, "Streaming started\n");
     usleep_range(IMX294_STREAM_DELAY_US,
              IMX294_STREAM_DELAY_US + IMX294_STREAM_DELAY_RANGE_US);
 
@@ -2015,7 +2015,7 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     return 0;
 
 err_rpm_put:
-    pm_runtime_put_autosuspend(imx294->clientdev);
+    pm_runtime_put_autosuspend(imx294->dev);
     return ret;
 }
 
@@ -2028,11 +2028,11 @@ static int imx294_disable_streams(struct v4l2_subdev *sd,
 
     ret = cci_write(imx294->regmap, IMX294_REG_MODE_SELECT, IMX294_MODE_STANDBY_BITS, NULL);
     if (ret)
-        dev_err(imx294->clientdev, "Failed to stop streaming\n");
+        dev_err(imx294->dev, "Failed to stop streaming\n");
 
     __v4l2_ctrl_grab(imx294->vflip, false);
 
-    pm_runtime_put_autosuspend(imx294->clientdev);
+    pm_runtime_put_autosuspend(imx294->dev);
 
     return ret;
 }
@@ -2048,17 +2048,17 @@ static int imx294_power_on(struct device *dev)
     struct imx294 *imx294 = to_imx294(sd);
     int ret;
 
-    dev_info(imx294->clientdev, "power_on\n");
+    dev_info(imx294->dev, "power_on\n");
 
     ret = regulator_bulk_enable(IMX294_NUM_SUPPLIES, imx294->supplies);
     if (ret) {
-        dev_err(imx294->clientdev, "Failed to enable regulators\n");
+        dev_err(imx294->dev, "Failed to enable regulators\n");
         return ret;
     }
 
     ret = clk_prepare_enable(imx294->xclk);
     if (ret) {
-        dev_err(imx294->clientdev, "Failed to enable clock\n");
+        dev_err(imx294->dev, "Failed to enable clock\n");
         goto reg_off;
     }
 
@@ -2077,7 +2077,7 @@ static int imx294_power_off(struct device *dev)
     struct v4l2_subdev *sd = dev_get_drvdata(dev);
     struct imx294 *imx294 = to_imx294(sd);
 
-    dev_info(imx294->clientdev, "power_off\n");
+    dev_info(imx294->dev, "power_off\n");
 
     gpiod_set_value_cansleep(imx294->reset_gpio, 0);
     regulator_bulk_disable(IMX294_NUM_SUPPLIES, imx294->supplies);
@@ -2228,7 +2228,7 @@ static int imx294_get_regulators(struct imx294 *imx294)
     for (i = 0; i < IMX294_NUM_SUPPLIES; i++)
         imx294->supplies[i].supply = imx294_supply_name[i];
 
-    return devm_regulator_bulk_get(imx294->clientdev,
+    return devm_regulator_bulk_get(imx294->dev,
                        IMX294_NUM_SUPPLIES, imx294->supplies);
 }
 
@@ -2240,11 +2240,11 @@ static int imx294_check_module_exists(struct imx294 *imx294)
     /* No chip-id register; read a known register as a presence test */
     ret = cci_read(imx294->regmap, IMX294_REG_BLKLEVEL, &val, NULL);
     if (ret) {
-        dev_err(imx294->clientdev, "register read failed (%d)\n", ret);
+        dev_err(imx294->dev, "register read failed (%d)\n", ret);
         return ret;
     }
 
-    dev_info(imx294->clientdev, "Sensor detected\n");
+    dev_info(imx294->dev, "Sensor detected\n");
     return 0;
 }
 
@@ -2261,7 +2261,7 @@ static int imx294_probe(struct i2c_client *client)
         return -ENOMEM;
 
     v4l2_i2c_subdev_init(&imx294->sd, client, &imx294_subdev_ops);
-    imx294->clientdev = dev;
+    imx294->dev = dev;
 
     imx294->sync_mode = SYNC_LEADER;
     if (!device_property_read_string(dev, "sony,sync-mode", &sync_mode)) {
@@ -2290,7 +2290,7 @@ static int imx294_probe(struct i2c_client *client)
         }
     }
     if (!imx294->freq) {
-        dev_err(imx294->clientdev, "xclk frequency unsupported: %d Hz\n", xclk_freq);
+        dev_err(imx294->dev, "xclk frequency unsupported: %d Hz\n", xclk_freq);
         return -EINVAL;
     }
 
@@ -2370,10 +2370,10 @@ static void imx294_remove(struct i2c_client *client)
     media_entity_cleanup(&sd->entity);
     imx294_free_controls(imx294);
 
-    pm_runtime_disable(imx294->clientdev);
-    if (!pm_runtime_status_suspended(imx294->clientdev))
-        imx294_power_off(imx294->clientdev);
-    pm_runtime_set_suspended(imx294->clientdev);
+    pm_runtime_disable(imx294->dev);
+    if (!pm_runtime_status_suspended(imx294->dev))
+        imx294_power_off(imx294->dev);
+    pm_runtime_set_suspended(imx294->dev);
 }
 
 static DEFINE_RUNTIME_DEV_PM_OPS(imx294_pm_ops, imx294_power_off,
