@@ -176,6 +176,80 @@ static const s64 imx294_link_freq_menu[] = {
 };
 
 
+struct imx294_input_frequency {
+    unsigned int mhz;
+    unsigned int reg_count;
+    struct cci_reg_sequence regs[10];
+};
+
+static const struct imx294_input_frequency imx294_frequencies[] = {
+    {
+        .mhz = 6000000U,
+        .reg_count = 10,
+        .regs = {
+            {IMX294_REG_PLRD1,0x0120},
+            {IMX294_REG_PLRD2,0x00},
+            {IMX294_REG_PLRD3,0x90},
+            {IMX294_REG_PLRD4,0x00},
+            {IMX294_REG_PLRD10,0x00},
+            {IMX294_REG_PLRD11,0x00},
+            {IMX294_REG_PLRD12,0x00},
+            {IMX294_REG_PLRD13,0x01},
+            {IMX294_REG_PLRD14,0x02},
+            {IMX294_REG_PLRD15,0x02},
+        },
+    },
+    {
+        .mhz = 12000000U,
+        .reg_count = 10,
+        .regs = {
+            {IMX294_REG_PLRD1,0x0120},
+            {IMX294_REG_PLRD2,0x01},
+            {IMX294_REG_PLRD3,0x90},
+            {IMX294_REG_PLRD4,0x01},
+            {IMX294_REG_PLRD10,0x00},
+            {IMX294_REG_PLRD11,0x00},
+            {IMX294_REG_PLRD12,0x00},
+            {IMX294_REG_PLRD13,0x01},
+            {IMX294_REG_PLRD14,0x02},
+            {IMX294_REG_PLRD15,0x02},
+        },
+    },
+    {
+        .mhz = 18000000U,
+        .reg_count = 10,
+        .regs = {
+            {IMX294_REG_PLRD1,0x01C0},
+            {IMX294_REG_PLRD2,0x01},
+            {IMX294_REG_PLRD3,0x60},
+            {IMX294_REG_PLRD4,0x01},
+            {IMX294_REG_PLRD10,0x00},
+            {IMX294_REG_PLRD11,0x00},
+            {IMX294_REG_PLRD12,0x00},
+            {IMX294_REG_PLRD13,0x01},
+            {IMX294_REG_PLRD14,0x02},
+            {IMX294_REG_PLRD15,0x02},
+        },
+    },
+    {
+        .mhz = 24000000U,
+        .reg_count = 10,
+        .regs = {
+            {IMX294_REG_PLRD1,0x0120},
+            {IMX294_REG_PLRD2,0x02},
+            {IMX294_REG_PLRD3,0x90},
+            {IMX294_REG_PLRD4,0x02},
+            {IMX294_REG_PLRD10,0x00},
+            {IMX294_REG_PLRD11,0x00},
+            {IMX294_REG_PLRD12,0x00},
+            {IMX294_REG_PLRD13,0x01},
+            {IMX294_REG_PLRD14,0x02},
+            {IMX294_REG_PLRD15,0x02},
+        },
+    },
+};
+
+
 /* --------------------------------------------------------------------------
  * Mode Registers
  * --------------------------------------------------------------------------
@@ -207,20 +281,6 @@ static const s64 imx294_link_freq_menu[] = {
 
 
 static const struct cci_reg_sequence mode_common_regs_stage1[] = {
-
-    {IMX294_REG_XMSTA_MSTSLV,0x30},
-    {CCI_REG8(0x303C),0x01},
-
-    {IMX294_REG_PLRD1,0x0120}, //PLRD1
-    {IMX294_REG_PLRD2,0x02}, //PLRD2
-    {IMX294_REG_PLRD3,0x90}, //PLRD3
-    {IMX294_REG_PLRD4,0x02}, //PLRD4
-    {IMX294_REG_PLRD10,0x00}, //PLRD10
-    {IMX294_REG_PLRD11,0x00}, //PLRD11
-    {IMX294_REG_PLRD12,0x00}, //PLRD12
-    {IMX294_REG_PLRD13,0x01}, //PLRD13
-    {IMX294_REG_PLRD14,0x02}, //PLRD14
-    {IMX294_REG_PLRD15,0x02}, //PLRD15
 
     {IMX294_REG_MODE_SELECT,0x12}, //STANDBY = 0 STBLOGIC register = 1h, STBMIPI register = 0h, STBDV register = 1h
     {IMX294_REG_STBPL,0x00}, //PLL release
@@ -374,11 +434,6 @@ static const struct cci_reg_sequence mode_common_regs_stage2[] = {
     {CCI_REG8(0x35E5),      0x92}, //CLKDIVEN register = 2h, SYSCLKEN register = 0h
     {CCI_REG8(0x35E5),      0x9A}, //CLKDIVEN register = 2h, SYSCLKEN register = 1h
     {IMX294_REG_MODE_SELECT,0x00}, //STANDBY register = 0h, STBLOGIC register = 0h, STBMIPI register = 0h, STBDV register = 0h
-};
-
-static const struct cci_reg_sequence mode_common_regs_stage3[] = {
-    {IMX294_REG_XMSTA_MSTSLV,0x20},
-    {IMX294_REG_SYNCDRV,0xA8}
 };
 
 /* 
@@ -1397,8 +1452,7 @@ struct imx294 {
     struct regmap *regmap;
 
     struct clk *xclk;
-    u32 xclk_freq;
-    u8  inck_sel_val;
+    const struct imx294_input_frequency *freq;
 
     unsigned int lane_count;
     unsigned int link_freq_idx;
@@ -1875,6 +1929,17 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
         pm_runtime_put_noidle(imx294->clientdev);
         return ret;
     }
+    /* (XMSTA register = 1h, MSTSLV register = 1h) */
+    cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, 0x30, &ret);
+    /* (SYS_MODE register = 1h) */
+    cci_write(imx294->regmap, CCI_REG8(0x303C), 0x01, &ret);
+
+    /* Configure PLL clocks based on the xclk */
+    cci_multi_reg_write(imx294->regmap, imx294->freq->regs,
+                imx294->freq->reg_count, &ret);
+
+    dev_info(imx294->clientdev, "Using clk freq %d Hz",
+        imx294->freq->mhz);
 
     ret = cci_multi_reg_write(imx294->regmap, mode_common_regs_stage1,
                   ARRAY_SIZE(mode_common_regs_stage1), NULL);
@@ -1882,6 +1947,7 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
         dev_err(imx294->clientdev, "Failed to write common settings stage 1\n");
         goto err_rpm_put;
     }
+
 
     /* Select mode */
     fmt = v4l2_subdev_state_get_format(state, 0);
@@ -1915,8 +1981,10 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
     }
 
     usleep_range(10000,12000);
-    ret = cci_multi_reg_write(imx294->regmap, mode_common_regs_stage3,
-                  ARRAY_SIZE(mode_common_regs_stage3), NULL);
+
+    cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, 0x20, &ret);
+    cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8, &ret);
+
     if (ret) {
         dev_err(imx294->clientdev, "Failed to write common settings stage 3\n");
         goto err_rpm_put;
@@ -2054,7 +2122,6 @@ static int imx294_init_state(struct v4l2_subdev *sd,
                  struct v4l2_subdev_state *state)
 {
     struct v4l2_rect *crop;
-    struct v4l2_mbus_framefmt *format;
     struct v4l2_subdev_format fmt = {
         .which  = V4L2_SUBDEV_FORMAT_TRY,
         .pad    = 0,
@@ -2172,7 +2239,8 @@ static int imx294_probe(struct i2c_client *client)
 {
     struct device *dev = &client->dev;
     struct imx294 *imx294;
-    int ret;
+    unsigned int xclk_freq;
+    int ret, i;
 
     imx294 = devm_kzalloc(dev, sizeof(*imx294), GFP_KERNEL);
     if (!imx294)
@@ -2192,6 +2260,18 @@ static int imx294_probe(struct i2c_client *client)
     imx294->xclk = devm_clk_get(dev, NULL);
     if (IS_ERR(imx294->xclk))
         return dev_err_probe(dev, PTR_ERR(imx294->xclk), "xclk missing\n");
+
+    xclk_freq = clk_get_rate(imx294->xclk);
+    for (i = 0; i < ARRAY_SIZE(imx294_frequencies); i++) {
+        if (xclk_freq == imx294_frequencies[i].mhz) {
+            imx294->freq = &imx294_frequencies[i];
+            break;
+        }
+    }
+    if (!imx294->freq) {
+        dev_err(imx294->clientdev, "xclk frequency unsupported: %d Hz\n", xclk_freq);
+        return -EINVAL;
+    }
 
     ret = imx294_get_regulators(imx294);
     if (ret)
