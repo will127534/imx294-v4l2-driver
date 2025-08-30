@@ -24,6 +24,17 @@
 
 
 /* --------------------------------------------------------------------------
+ * Driver-local custom controls
+ * --------------------------------------------------------------------------
+ */
+
+#ifndef V4L2_CID_USER_IMX585_BASE
+#define V4L2_CID_USER_IMX585_BASE (V4L2_CID_USER_BASE + 0x2000)
+#endif
+
+#define V4L2_CID_IMX585_HCG_GAIN        (V4L2_CID_USER_IMX585_BASE + 6)
+
+/* --------------------------------------------------------------------------
  * Registers / limits
  * --------------------------------------------------------------------------
  */
@@ -1408,9 +1419,6 @@ struct imx294 {
     struct v4l2_ctrl *hblank;
     struct v4l2_ctrl *blacklevel;
 
-    /* Flags/params */
-    bool hcg;
-
     u16  hmax;
     u32  vmax;
 
@@ -1661,6 +1669,12 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
             dev_err_ratelimited(imx294->clientdev, "BLKLEVEL write failed (%d)\n", ret);
         break;
     }
+    case V4L2_CID_IMX585_HCG_GAIN:
+        dev_info(imx294->clientdev, "HCG=%u\n", ctrl->val);
+        ret = cci_write(imx294->regmap, IMX294_REG_MCOVGAIN, ctrl->val, NULL);
+        if (ret)
+            dev_err_ratelimited(imx294->clientdev, "MCOVGAIN write failed (%d)\n", ret);
+        break;
     default:
         dev_info(imx294->clientdev, "Unhandled ctrl %s: id=0x%x, val=0x%x\n",
             ctrl->name, ctrl->id, ctrl->val);
@@ -1674,6 +1688,18 @@ static int imx294_set_ctrl(struct v4l2_ctrl *ctrl)
 static const struct v4l2_ctrl_ops imx294_ctrl_ops = {
     .s_ctrl = imx294_set_ctrl,
 };
+
+static const struct v4l2_ctrl_config imx294_cfg_hcg = {
+    .ops  = &imx294_ctrl_ops,
+    .id   = V4L2_CID_IMX585_HCG_GAIN,
+    .name = "HCG Enable",
+    .type = V4L2_CTRL_TYPE_BOOLEAN,
+    .min  = 0,
+    .max  = 1,
+    .step = 1,
+    .def  = 0,
+};
+
 
 static int imx294_init_controls(struct imx294 *imx294)
 {
@@ -1712,6 +1738,8 @@ static int imx294_init_controls(struct imx294 *imx294)
 
     imx294->vflip = v4l2_ctrl_new_std(hdl, &imx294_ctrl_ops,
                       V4L2_CID_VFLIP, 0, 1, 1, 0);
+
+    imx294->hcg_ctrl = v4l2_ctrl_new_custom(hdl, &imx294_cfg_hcg, NULL);
 
     if (hdl->error) {
         ret = hdl->error;
@@ -1795,6 +1823,9 @@ static int imx294_set_pad_format(struct v4l2_subdev *sd,
     struct v4l2_mbus_framefmt *format;
     struct v4l2_rect *crop;
 
+    /* Normalize requested code to what we really support */
+    fmt->format.code = imx294_get_format_code(imx294, fmt->format.code);
+
     get_mode_table(imx294, fmt->format.code, &mode_list, &num_modes);
     mode = v4l2_find_nearest_size(mode_list, num_modes, width, height,
                                   fmt->format.width, fmt->format.height);
@@ -1807,17 +1838,21 @@ static int imx294_set_pad_format(struct v4l2_subdev *sd,
     fmt->format.quantization = V4L2_QUANTIZATION_FULL_RANGE;
     fmt->format.xfer_func    = V4L2_XFER_FUNC_NONE;
 
+    /* Update TRY/ACTIVE format kept by the framework */
     format = v4l2_subdev_state_get_format(sd_state, 0);
     *format = fmt->format;
 
+    /* Keep the crop in sync with the selected mode */
     crop = v4l2_subdev_state_get_crop(sd_state, 0);
     *crop = mode->crop;
 
+    /* Update control ranges only for ACTIVE config */
     if (fmt->which == V4L2_SUBDEV_FORMAT_ACTIVE)
         imx294_set_framing_limits(imx294, mode);
 
     return 0;
 }
+
 
 
 /* --------------------------------------------------------------------------
@@ -1985,20 +2020,31 @@ static int imx294_get_selection(struct v4l2_subdev *sd,
     fmt = v4l2_subdev_state_get_format(sd_state, 0);
     get_mode_table(imx294, fmt->code, &mode_list, &n_modes);
     mode = v4l2_find_nearest_size(mode_list, n_modes, width, height,
-                      fmt->width, fmt->height);
+                                  fmt->width, fmt->height);
 
     switch (sel->target) {
     case V4L2_SEL_TGT_NATIVE_SIZE:
         sel->r.left   = 0;
         sel->r.top    = 0;
-        sel->r.width  = mode->width;
+        sel->r.width  = mode->width;   /* pixel array (no blanking) */
         sel->r.height = mode->height;
         return 0;
-    case V4L2_SEL_TGT_CROP_DEFAULT:
+
     case V4L2_SEL_TGT_CROP_BOUNDS:
+        sel->r.left   = 0;
+        sel->r.top    = 0;
+        sel->r.width  = mode->width;   /* full array bounds */
+        sel->r.height = mode->height;
+        return 0;
+
+    case V4L2_SEL_TGT_CROP_DEFAULT:
+        sel->r = mode->crop;                /* recommended default */
+        return 0;
+
     case V4L2_SEL_TGT_CROP:
         sel->r = *v4l2_subdev_state_get_crop(sd_state, 0);
         return 0;
+
     default:
         return -EINVAL;
     }
@@ -2008,6 +2054,7 @@ static int imx294_init_state(struct v4l2_subdev *sd,
                  struct v4l2_subdev_state *state)
 {
     struct v4l2_rect *crop;
+    struct v4l2_mbus_framefmt *format;
     struct v4l2_subdev_format fmt = {
         .which  = V4L2_SUBDEV_FORMAT_TRY,
         .pad    = 0,
