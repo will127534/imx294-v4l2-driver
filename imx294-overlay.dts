@@ -61,6 +61,7 @@
 
 				rotation = <0>;
 				orientation = <0>;
+				sony,sync-mode = "leader";
 
 				port {
 					cam_endpoint: endpoint {
@@ -98,6 +99,7 @@
 	__overrides__ {
 		rotation = <&cam_node>,"rotation:0";
 		orientation = <&cam_node>,"orientation:0";
+		sync-mode   = <&cam_node>, "sony,sync-mode=%s";
 		media-controller = <&csi>,"brcm,media-controller?";
 		cam0 = <&i2c_frag>, "target:0=",<&i2c_csi_dsi0>,
 		       <&csi_frag>, "target:0=",<&csi0>,
