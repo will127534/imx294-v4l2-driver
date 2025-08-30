@@ -62,7 +62,7 @@
 
 #define IMX294_REG_XMSTA_MSTSLV         CCI_REG8(0x3033)
 /* Master Mode Operation Control 0x00 = start 0x01 = stop */
-#define IMX294_MODE_XMSTA_BITS           BIT(0)
+#define IMX294_MODE_XMSTA_BITS           BIT(4)
 /* Master / Slave Switching Control 0x00 = slave 0x01 = master*/
 #define IMX294_MODE_MSTSLV_BITS          BIT(5)
 
@@ -281,8 +281,8 @@ static const struct imx294_input_frequency imx294_frequencies[] = {
 
 
 static const struct cci_reg_sequence mode_common_regs_stage1[] = {
-
-    {IMX294_REG_MODE_SELECT,0x12}, //STANDBY = 0 STBLOGIC register = 1h, STBMIPI register = 0h, STBDV register = 1h
+    //STANDBY = 0 STBLOGIC register = 1h, STBMIPI register = 0h, STBDV register = 1h
+    {IMX294_REG_MODE_SELECT, IMX294_MODE_STBLOGIC_BITS | IMX294_MODE_STBDV_BITS}, 
     {IMX294_REG_STBPL,0x00}, //PLL release
 
     //PLSTMG Settings
@@ -430,7 +430,7 @@ static const struct cci_reg_sequence mode_common_regs_stage1[] = {
 };
 
 static const struct cci_reg_sequence mode_common_regs_stage2[] = {
-    {IMX294_REG_MODE_SELECT,0x02}, //STANDBY register = 0h, STBLOGIC register = 1h, STBMIPI register = 0h, STBDV register = 0h
+    {IMX294_REG_MODE_SELECT,IMX294_MODE_STBLOGIC_BITS}, //STANDBY register = 0h, STBLOGIC register = 1h, STBMIPI register = 0h, STBDV register = 0h
     {CCI_REG8(0x35E5),      0x92}, //CLKDIVEN register = 2h, SYSCLKEN register = 0h
     {CCI_REG8(0x35E5),      0x9A}, //CLKDIVEN register = 2h, SYSCLKEN register = 1h
     {IMX294_REG_MODE_SELECT,0x00}, //STANDBY register = 0h, STBLOGIC register = 0h, STBMIPI register = 0h, STBDV register = 0h
@@ -974,7 +974,15 @@ static const struct cci_reg_sequence mode_10_4_3_regs[] = {
     {IMX294_REG_MDSEL10,0x0000},
 };
 
+enum {
+    SYNC_LEADER,
+    SYNC_EXTERNAL,
+};
 
+static const char * const sync_mode_menu[] = {
+    "Leader Mode",
+    "Follower Mode",
+};
 
 /* Mode description */
 struct imx294_mode {
@@ -1454,8 +1462,7 @@ struct imx294 {
     struct clk *xclk;
     const struct imx294_input_frequency *freq;
 
-    unsigned int lane_count;
-    unsigned int link_freq_idx;
+    u8   sync_mode;
 
     struct gpio_desc *reset_gpio;
     struct regulator_bulk_data supplies[IMX294_NUM_SUPPLIES];
@@ -1929,8 +1936,9 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
         pm_runtime_put_noidle(imx294->clientdev);
         return ret;
     }
+
     /* (XMSTA register = 1h, MSTSLV register = 1h) */
-    cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, 0x30, &ret);
+    cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, IMX294_MODE_XMSTA_BITS | IMX294_MODE_MSTSLV_BITS, &ret);
     /* (SYS_MODE register = 1h) */
     cci_write(imx294->regmap, CCI_REG8(0x303C), 0x01, &ret);
 
@@ -1982,12 +1990,19 @@ static int imx294_enable_streams(struct v4l2_subdev *sd,
 
     usleep_range(10000,12000);
 
-    cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, 0x20, &ret);
-    cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8, &ret);
-
-    if (ret) {
-        dev_err(imx294->clientdev, "Failed to write common settings stage 3\n");
-        goto err_rpm_put;
+    /* Sync configuration */
+    if (imx294->sync_mode == SYNC_LEADER) {
+        dev_info(imx294->clientdev, "Internal sync follower: XVS input\n");
+        //Master / Slave Switching -> Master mode , Master mode operation -> Master mode start
+        cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, IMX294_MODE_MSTSLV_BITS, &ret);
+        //XVS/XHS output (top 5 bits is always 0x2A)
+        cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8, &ret);
+    } else {
+        dev_info(imx294->clientdev, "Follower: XVS/XHS input\n");
+        //Master / Slave Switching -> Slave mode , Master mode operation -> Master mode stop
+        cci_write(imx294->regmap, IMX294_REG_XMSTA_MSTSLV, IMX294_MODE_XMSTA_BITS, &ret);
+        //XHS/XVS is Hi-Z (top 5 bits is always 0x2A)
+        cci_write(imx294->regmap, IMX294_REG_SYNCDRV, 0xA8 | 0x03, &ret);
     }
 
     dev_info(imx294->clientdev, "Streaming started\n");
@@ -2011,7 +2026,7 @@ static int imx294_disable_streams(struct v4l2_subdev *sd,
     struct imx294 *imx294 = to_imx294(sd);
     int ret;
 
-    ret = cci_write(imx294->regmap, IMX294_REG_MODE_SELECT, 0x01, NULL);
+    ret = cci_write(imx294->regmap, IMX294_REG_MODE_SELECT, IMX294_MODE_STANDBY_BITS, NULL);
     if (ret)
         dev_err(imx294->clientdev, "Failed to stop streaming\n");
 
@@ -2196,8 +2211,6 @@ static int imx294_check_hwcfg(struct device *dev, struct imx294 *imx294)
         dev_err(dev, "only 4 data lanes supported\n");
         goto out_free;
     }
-    imx294->lane_count = ep.bus.mipi_csi2.num_data_lanes;
-    dev_info(dev, "Data lanes: %u\n", imx294->lane_count);
 
     ret = 0;
 
@@ -2241,6 +2254,7 @@ static int imx294_probe(struct i2c_client *client)
     struct imx294 *imx294;
     unsigned int xclk_freq;
     int ret, i;
+    const char *sync_mode;
 
     imx294 = devm_kzalloc(dev, sizeof(*imx294), GFP_KERNEL);
     if (!imx294)
@@ -2248,6 +2262,13 @@ static int imx294_probe(struct i2c_client *client)
 
     v4l2_i2c_subdev_init(&imx294->sd, client, &imx294_subdev_ops);
     imx294->clientdev = dev;
+
+    imx294->sync_mode = SYNC_LEADER;
+    if (!device_property_read_string(dev, "sony,sync-mode", &sync_mode)) {
+        if(!strcmp(sync_mode, "external"))
+            imx294->sync_mode = SYNC_EXTERNAL;
+    }
+    dev_info(dev, "sync-mode: %s\n", sync_mode_menu[imx294->sync_mode]);
 
     ret = imx294_check_hwcfg(dev, imx294);
     if (ret)
