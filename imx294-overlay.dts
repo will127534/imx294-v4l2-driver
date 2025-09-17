@@ -107,7 +107,7 @@
 		       <&reg_frag>, "target:0=",<&cam0_reg>,
 		       <&reg_alwayson_frag>, "target:0=",<&cam0_reg>,
 		       <&cam_node>, "clocks:0=",<&cam0_clk>,
-		       <&cam_node>, "VANA-supply:0=",<&cam0_reg>;
+		       <&cam_node>, "vana-supply:0=",<&cam0_reg>;
 		always-on = <0>, "+99";
 	};
 };
